@@ -1,0 +1,61 @@
+@import 'tailwindcss';
+
+/*
+ * Tokens PROVISÓRIOS, estimados a partir dos prints do Figma.
+ * Trocar pelos valores exatos (Figma > Variables / Dev Mode) assim que forem conferidos.
+ */
+@theme {
+  --color-bg: #1a0f0a;
+  --color-surface: #241510;
+  --color-surface-2: #2e1b13;
+  --color-border: #4a2e1f;
+  --color-accent: #d98c4a;
+  --color-accent-strong: #e9a15f;
+  --color-ink: #f3e7d8;
+  --color-muted: #b09a85;
+  --color-danger: #ff8a7a;
+  --color-ok: #8fd19e;
+  --font-mono: ui-monospace, 'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, monospace;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent-strong);
+  outline-offset: 2px;
+}
+
+/* Skeleton com shimmer; respeita prefers-reduced-motion. */
+.skeleton {
+  background: linear-gradient(90deg, var(--color-surface) 25%, var(--color-surface-2) 50%, var(--color-surface) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+  border-radius: 6px;
+}
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}
