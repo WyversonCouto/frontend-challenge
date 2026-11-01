@@ -2,8 +2,9 @@
 
 Desafio Frontend: React + TypeScript, TanStack Router/Query, Axios, Socket.IO, Tailwind, shadcn/ui, MSW, Playwright e Lighthouse.
 
-> Estado atual: telas de início, detalhe, carrinho, pagamento, confirmação, login, cadastro, perfil e carteiras (desktop e mobile),
-> sobre contratos tipados e a camada MSW (REST + Socket.IO). Testes Playwright e auditoria Lighthouse: próximos passos.
+> **Aplicação publicada:** https://frontend-challenge-kappa-lac.vercel.app
+>
+> Estado atual: todas as telas (início, detalhe, carrinho, pagamento, confirmação, login, cadastro, perfil e carteiras, em desktop e mobile), camada MSW (REST + Socket.IO), 72 testes Playwright e auditoria Lighthouse (`npm run lighthouse`).
 
 ## Setup
 
