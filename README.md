@@ -78,3 +78,5 @@ npm run e2e:report                  # relatório HTML; traces das falhas ficam e
 - Projetos: `desktop` (1440×900, todos os testes), `mobile` (390×844: compra, autenticação, carrinho e responsividade) e `tablet` (768×1024: responsividade).
 - REST passa pelos handlers MSW; tempo real passa pelo `socket.io-client` real (eventos disparados por `/__mock/...`, nunca por setters na UI).
 - Latência e falhas são controladas pelos cenários (`?scenario=...`), então os testes sensíveis a tempo não dependem de relógio real.
+
+> **Regressão visual:** as capturas de referência dependem do sistema operacional (o Playwright acrescenta `-win32`, `-linux` ou `-darwin` ao nome). Gere as do seu ambiente com `npm run test:e2e:update` antes de rodar `npm run test:e2e`. Se a máquina for lenta, use `-- --workers=2`.

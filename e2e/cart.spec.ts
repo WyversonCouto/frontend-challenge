@@ -1,12 +1,12 @@
 import { expect, test } from '@playwright/test'
-import { buy, login } from './helpers'
+import { buy, cartItem, login } from './helpers'
 
 test('5. carrinho: quantidades, cupom, remoção e persistência após refresh', async ({ page }) => {
   await buy(page, 'nft-001')
-  await expect(page.getByRole('link', { name: 'Emerald Ape #042' })).toBeVisible()
+  await expect(cartItem(page, 'Emerald Ape #042')).toBeVisible()
 
   await page.getByRole('button', { name: 'Aumentar quantidade' }).click()
-  await expect(page.getByText('2.38 ETH').first()).toBeVisible()
+  await expect(page.getByText('2.38 ETH').filter({ visible: true }).first()).toBeVisible()
 
   // cupom inválido, expirado e válido
   await page.locator('#cupom').fill('XYZ')
@@ -24,7 +24,7 @@ test('5. carrinho: quantidades, cupom, remoção e persistência após refresh',
 
   // persiste após refresh
   await page.reload()
-  await expect(page.getByRole('link', { name: 'Emerald Ape #042' })).toBeVisible()
+  await expect(cartItem(page, 'Emerald Ape #042')).toBeVisible()
   await expect(page.getByText('2.158 ETH', { exact: true })).toBeVisible()
 
   // remover
@@ -36,10 +36,9 @@ test('5b. itens do visitante são preservados ao autenticar', async ({ page }) =
   await buy(page, 'nft-001')
   await login(page)
   await page.goto('/carrinho')
-  await expect(page.getByRole('link', { name: 'Emerald Ape #042' })).toBeVisible()
-  const guest = await page.evaluate(() => localStorage.getItem('kurio:cart:guest'))
-  expect(guest).toBeNull()
+  await expect(cartItem(page, 'Emerald Ape #042')).toBeVisible()
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('kurio:cart:guest'))).toBeNull()
   // e continua depois de um refresh (agora vem da API)
   await page.reload()
-  await expect(page.getByRole('link', { name: 'Emerald Ape #042' })).toBeVisible()
+  await expect(cartItem(page, 'Emerald Ape #042')).toBeVisible()
 })

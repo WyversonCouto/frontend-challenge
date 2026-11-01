@@ -8,7 +8,7 @@ import { shortAddress, useWallets } from '@/features/wallets/api'
 import { FormField, inputClass } from '@/components/FormField'
 import { Breadcrumb } from '@/components/parts'
 import { SummaryRows } from '@/components/Summary'
-import { Button, Skeleton } from '@/components/ui'
+import { Button, Skeleton, trapTab } from '@/components/ui'
 import { ApiError, http } from '@/lib/api'
 import { announce } from '@/lib/announce'
 import { formatEth } from '@/lib/eth'
@@ -49,7 +49,8 @@ const writeJson = (key: string, value: unknown) => {
  * então repetir o envio após timeout recupera o mesmo pedido em vez de criar outro.
  */
 function intentKey(payload: CreateOrderInput) {
-  const hash = JSON.stringify(payload)
+  // Só o que define a intenção: valores esperados mudam com preço/estoque e não entram na chave.
+  const hash = JSON.stringify({ items: payload.items, coupon: payload.coupon, walletId: payload.walletId, network: payload.network, buyer: payload.buyer })
   const saved = readJson<{ hash: string; key: string }>(INTENT)
   if (saved?.hash === hash) return saved.key
   const key = crypto.randomUUID()
@@ -373,7 +374,7 @@ export function CheckoutPage() {
       </div>
 
       {/* Revisão final antes do envio */}
-      <dialog ref={reviewRef} aria-labelledby="revisao-titulo" onClose={() => setReview(false)} className="m-auto w-[420px] max-w-[92vw] border-b-4 border-accent bg-surface p-6 text-ink backdrop:bg-black/70">
+      <dialog ref={reviewRef} aria-labelledby="revisao-titulo" onKeyDown={trapTab} onClose={() => setReview(false)} className="m-auto w-[420px] max-w-[92vw] border-b-4 border-accent bg-surface p-6 text-ink backdrop:bg-black/70">
         <h2 id="revisao-titulo" className="text-sm font-bold">Revise seu pedido</h2>
         <dl className="mt-4 space-y-2 text-xs">
           <div className="flex justify-between"><dt className="text-muted">Itens</dt><dd>{cart.count}</dd></div>

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { BRUNO, login } from './helpers'
+import { BRUNO, login, logout } from './helpers'
 
 test('4. favoritos persistem para o usuário autenticado', async ({ page }) => {
   await login(page)
@@ -7,6 +7,8 @@ test('4. favoritos persistem para o usuário autenticado', async ({ page }) => {
   const fav = page.getByRole('button', { name: /^Favorit/ })
   await fav.click()
   await expect(fav).toHaveAttribute('aria-pressed', 'true')
+  // espera a API confirmar antes de recarregar (senão o refresh aborta a requisição)
+  await expect(page.getByText('Adicionado aos favoritos.')).toBeVisible()
   await page.reload()
   await expect(page.getByRole('button', { name: /^Favorit/ })).toHaveAttribute('aria-pressed', 'true')
 })
@@ -30,8 +32,8 @@ test('favoritos de um usuário não aparecem para outro', async ({ page }) => {
   await login(page)
   await page.goto('/nft/nft-003')
   await page.getByRole('button', { name: /^Favorit/ }).click()
-  await expect(page.getByRole('button', { name: /^Favorit/ })).toHaveAttribute('aria-pressed', 'true')
-  await page.getByRole('button', { name: 'Sair' }).click()
+  await expect(page.getByText('Adicionado aos favoritos.')).toBeVisible()
+  await logout(page)
   await login(page, BRUNO)
   await page.goto('/nft/nft-003')
   await expect(page.getByRole('button', { name: /^Favorit/ })).toHaveAttribute('aria-pressed', 'false')

@@ -54,12 +54,16 @@ export async function register(input: {
 }
 
 export async function logout() {
-  try {
-    await http.post('/auth/logout')
-  } catch {
-    /* mesmo sem resposta, a sessão local é encerrada */
-  }
+  // A sessão local termina na hora: se o usuário navegar ou fechar a aba logo em seguida,
+  // nada fica logado por engano. A API é avisada depois, com o token que acabou de sair.
+  const token = getSession()?.token
   endSession()
+  if (!token) return
+  try {
+    await http.post('/auth/logout', undefined, { headers: { Authorization: `Bearer ${token}` } })
+  } catch {
+    /* sem resposta: o token expira sozinho no servidor */
+  }
 }
 
 /** Chamado no boot: valida o token guardado e abre o socket. */

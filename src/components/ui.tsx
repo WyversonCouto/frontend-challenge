@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, ReactNode } from 'react'
+import type { ButtonHTMLAttributes, KeyboardEvent, ReactNode } from 'react'
 import { announce } from '@/lib/announce'
 
 type Variant = 'primary' | 'outline' | 'ghost'
@@ -21,6 +21,29 @@ export function Button({
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant }) {
   return <button type="button" className={buttonClass(variant, className)} {...props} />
+}
+
+/**
+ * <dialog>.showModal() deixa o Tab sair para a barra do navegador depois do último elemento.
+ * Este handler faz o foco dar a volta dentro do diálogo (Tab no último vai ao primeiro e vice-versa).
+ */
+export function trapTab(e: KeyboardEvent<HTMLElement>) {
+  if (e.key !== 'Tab') return
+  const root = e.currentTarget
+  const items = [
+    ...root.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'),
+  ].filter((el) => el.offsetParent !== null)
+  if (!items.length) return
+  const first = items[0]
+  const last = items[items.length - 1]
+  const active = document.activeElement
+  if (e.shiftKey && (active === first || active === root)) {
+    e.preventDefault()
+    last.focus()
+  } else if (!e.shiftKey && active === last) {
+    e.preventDefault()
+    first.focus()
+  }
 }
 
 /** Ação fora do escopo: nunca aparenta sucesso funcional, só informa. */

@@ -535,7 +535,9 @@ export const restHandlers = [
       // Mesma chave + mesmo conteúdo = mesmo pedido. Mesma chave + outro conteúdo = conflito.
       const idKey = `${auth.user.id}:${key}`
       const known = db().idempotency[idKey]
-      const hash = JSON.stringify(input)
+      // Define "o mesmo pedido": itens, cupom, carteira, rede e comprador. Os valores esperados
+      // mudam com preço e estoque, então não entram: repetir o envio recupera o mesmo pedido.
+      const hash = JSON.stringify({ items: input.items, coupon: input.coupon, walletId: input.walletId, network: input.network, buyer: input.buyer })
       if (known) {
         if (known.hash !== hash) {
           return fail('idempotency_conflict', 'Esta chave já foi usada com outro conteúdo.')

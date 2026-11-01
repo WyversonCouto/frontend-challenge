@@ -5,7 +5,7 @@ import { login, register } from '@/features/auth/actions'
 import { mergeGuestCart } from '@/features/cart/useCart'
 import { ApiError } from '@/lib/api'
 import { announce } from '@/lib/announce'
-import { Button, Icon } from '@/components/ui'
+import { Button, Icon, trapTab } from '@/components/ui'
 
 type Mode = 'login' | 'register'
 type Values = Record<'username' | 'email' | 'password' | 'confirmPassword', string>
@@ -160,6 +160,7 @@ export function AuthPage({ mode }: { mode: Mode }) {
       <dialog
         ref={dialogRef}
         aria-labelledby="auth-title"
+        onKeyDown={trapTab}
         onClose={(e) => {
           // Só reage a um fechamento real (Esc ou botão fechar).
           if (!e.currentTarget.open) void navigate({ to: '/' })

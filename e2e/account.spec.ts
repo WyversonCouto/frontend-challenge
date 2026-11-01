@@ -20,8 +20,10 @@ test('8. perfil: validação, edição, avatar e senha, com persistência após 
   // avatar (imagem enviada pelo usuário)
   const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64')
   await page.getByLabel('Escolher imagem de avatar').setInputFiles({ name: 'avatar.png', mimeType: 'image/png', buffer: png })
-  await page.getByRole('button', { name: 'Salvar', exact: true }).click()
   await expect(page.getByRole('img', { name: 'Seu avatar' })).toBeVisible()
+  const saved = page.waitForResponse((r) => r.url().endsWith('/api/profile') && r.request().method() === 'PATCH')
+  await page.getByRole('button', { name: 'Salvar', exact: true }).click()
+  await saved
   await page.reload()
   await expect(page.getByRole('img', { name: 'Seu avatar' })).toBeVisible()
 

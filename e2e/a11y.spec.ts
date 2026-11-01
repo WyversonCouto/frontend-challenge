@@ -25,6 +25,7 @@ test('11. login: foco preso no diálogo, Esc fecha e erros ficam associados aos 
 
 test('navegação por teclado: foco visível, link de pular e carrinho acessível', async ({ page }) => {
   await page.goto('/')
+  await expect(page.getByRole('main')).toBeVisible()
   await page.keyboard.press('Tab')
   const skip = page.getByRole('link', { name: 'Pular para o conteúdo' })
   await expect(skip).toBeFocused()

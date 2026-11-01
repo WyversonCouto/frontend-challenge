@@ -353,7 +353,7 @@ export function buildQuote(items: CartItem[], coupon?: string): Quote {
     coupon: coupon?.trim() || undefined,
     couponStatus: status,
     fingerprint: fingerprintOf([
-      ...lines.map((l) => `${l.nftId}:${l.quantity}:${l.unitPrice}:${l.available}`),
+      ...lines.map((l) => `${l.nftId}:${l.quantity}:${l.unitPrice}:${l.ok ? 'ok' : 'sem'}`),
       discount,
       networkFee,
       status,

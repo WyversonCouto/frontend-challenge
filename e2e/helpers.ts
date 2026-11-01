@@ -8,7 +8,18 @@ export async function login(page: Page, user = ANA) {
   await page.locator('#email').fill(user.email)
   await page.locator('#password').fill(user.password)
   await page.getByRole('button', { name: 'Entrar', exact: true }).click()
+  // Só vale como "logado" depois de sair da tela de login (a mesclagem do carrinho já terminou).
+  await expect(page).not.toHaveURL(/\/login/)
   await expect(page.getByRole('button', { name: 'Sair' })).toBeVisible()
+}
+
+/** Linha do item no carrinho (a faixa "Colecionadores também viram" tem links com o mesmo nome). */
+export const cartItem = (page: Page, name: string) => page.getByRole('region', { name: 'Itens do carrinho' }).getByRole('link', { name })
+
+/** Encerra a sessão e espera a tela refletir o logout. */
+export async function logout(page: Page) {
+  await page.getByRole('button', { name: 'Sair' }).first().click()
+  await expect(page.getByRole('link', { name: 'Entrar' }).first()).toBeVisible()
 }
 
 /** Chama o controle do ambiente simulado a partir da própria página (o MSW intercepta no navegador). */
@@ -20,6 +31,15 @@ export async function mock(page: Page, path: string, body?: unknown) {
     },
     [path, body] as const,
   )
+}
+
+/**
+ * Define o cenário ANTES de qualquer página carregar (script de inicialização do contexto).
+ * Abrir "/?scenario=..." e navegar logo depois é uma corrida: o app grava a escolha só depois
+ * de ligar o MSW, e uma navegação rápida a perde.
+ */
+export async function scenario(page: Page, name: string) {
+  await page.addInitScript((n) => localStorage.setItem('kurio:mock:scenario', n), name)
 }
 
 export const setScenario = (page: Page, name: string) => mock(page, '/__mock/scenario', { name })

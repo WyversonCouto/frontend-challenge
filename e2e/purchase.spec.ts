@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { login, ordersCount, receipt, reviewOrder, toCheckout } from './helpers'
+import { cartItem, login, ordersCount, receipt, reviewOrder, scenario, toCheckout } from './helpers'
 
 const send = (page: import('@playwright/test').Page) => page.getByRole('button', { name: 'Enviar pedido' })
 
@@ -36,14 +36,14 @@ test('7a. carteira que recusa a conexão impede a compra', async ({ page }) => {
 })
 
 test('7b. pagamento recusado: sem recibo e itens preservados', async ({ page }) => {
-  await page.goto('/?scenario=payment_declined')
+  await scenario(page, 'payment_declined')
   await toCheckout(page)
   await reviewOrder(page)
   await send(page).click()
   await expect(page.getByRole('heading', { name: 'Pagamento recusado' })).toBeVisible({ timeout: 15_000 })
   await expect(receipt(page)).toBeHidden()
   await page.goto('/carrinho')
-  await expect(page.getByRole('link', { name: 'Emerald Ape #042' })).toBeVisible()
+  await expect(cartItem(page, 'Emerald Ape #042')).toBeVisible()
 })
 
 test('7c. clique repetido não cria pedido duplicado', async ({ page }) => {
@@ -55,7 +55,7 @@ test('7c. clique repetido não cria pedido duplicado', async ({ page }) => {
 })
 
 test('7d. timeout após criar o pedido: recuperação pela mesma chave de idempotência', async ({ page }) => {
-  await page.goto('/?scenario=order_timeout')
+  await scenario(page, 'order_timeout')
   await toCheckout(page)
   await reviewOrder(page)
   await send(page).click()
@@ -66,7 +66,7 @@ test('7d. timeout após criar o pedido: recuperação pela mesma chave de idempo
 })
 
 test('revalidação: preço alterado durante a compra exige nova confirmação', async ({ page }) => {
-  await page.goto('/?scenario=price_changed_at_checkout')
+  await scenario(page, 'price_changed_at_checkout')
   await toCheckout(page)
   await reviewOrder(page)
   await send(page).click()
@@ -83,7 +83,7 @@ test('revalidação: preço alterado durante a compra exige nova confirmação',
 })
 
 test('edição esgotada durante a compra bloqueia o pedido', async ({ page }) => {
-  await page.goto('/?scenario=sold_out_at_checkout')
+  await scenario(page, 'sold_out_at_checkout')
   await toCheckout(page)
   await reviewOrder(page)
   await send(page).click()

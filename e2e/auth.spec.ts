@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { ANA, BRUNO, login } from './helpers'
+import { ANA, BRUNO, login, logout } from './helpers'
 
 test('3. cadastro, conflito de e-mail, login, logout e sessão após refresh', async ({ page }) => {
   // conflito de cadastro (e-mail da Ana)
@@ -60,7 +60,7 @@ test('3c. troca de usuário não vaza dados privados', async ({ page }) => {
   await login(page, ANA)
   await page.goto('/carteiras')
   await expect(page.locator('#primary-displayName')).toHaveValue('Ana Souza')
-  await page.getByRole('button', { name: 'Sair' }).first().click()
+  await logout(page)
 
   await login(page, BRUNO)
   await page.goto('/carteiras')
