@@ -12,7 +12,7 @@ import type {
 import { bus } from './bus'
 import { getScenario } from './scenarios'
 
-const STORAGE_KEY = 'kurio:mock:db:v1'
+const STORAGE_KEY = 'kurio:mock:db:v2'
 export const NETWORK_FEE = '0.016'
 export const SESSION_TTL_MS = 30 * 60 * 1000
 export const ORDER_SETTLE_MS = 2500
@@ -198,9 +198,12 @@ async function seedDb(): Promise<Db> {
           displayName: 'Ana Souza',
           nickname: 'Principal',
           network: 'Ethereum',
-          address: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F',
+          profileName: 'ana.souza',
+          address: '0xA91F4c2d8b0E73aF5C19d6E2b7A03f48c1D9E82C',
           type: 'MetaMask',
+          referralCode: 'KURIO-ANA',
           email: 'ana@kurio.test',
+          ens: 'ana.eth',
         },
         {
           // Esta carteira sempre recusa a conexão: cenário determinístico de recusa.
@@ -209,9 +212,12 @@ async function seedDb(): Promise<Db> {
           displayName: 'Ana Souza',
           nickname: 'Reserva',
           network: 'Polygon',
+          profileName: 'ana.reserva',
           address: '0x3aB1F9c2D0e4A7b6C58d19E7f20a4B6c9D13e5F8',
           type: 'Coinbase Wallet',
+          referralCode: 'KURIO-ANA',
           email: 'ana@kurio.test',
+          ens: 'nova.kurio.eth',
         },
       ],
       [bruno.id]: [],
@@ -322,6 +328,7 @@ export function buildQuote(items: CartItem[], coupon?: string): Quote {
         name: nft.name,
         imageUrl: nft.imageUrl,
         editionLabel: `${Math.min(item.quantity, nft.editionsTotal)}/${nft.editionsTotal}`,
+        tokenId: nft.tokenId,
         quantity: item.quantity,
         unitPrice: nft.price,
         lineTotal: mulEthInt(nft.price, item.quantity),
@@ -438,11 +445,13 @@ export function createOrder(args: {
     network,
     walletId: wallet.id,
     walletAddress: wallet.address,
+    walletType: wallet.type,
     lines: quote.lines.map((l) => ({
       nftId: l.nftId,
       name: l.name,
       imageUrl: l.imageUrl,
       editionLabel: l.editionLabel,
+      tokenId: l.tokenId,
       quantity: l.quantity,
       unitPrice: l.unitPrice,
       lineTotal: l.lineTotal,

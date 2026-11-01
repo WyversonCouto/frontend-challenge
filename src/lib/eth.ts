@@ -45,5 +45,5 @@ export function formatEth(value: Eth, minFraction = 2, maxFraction = 3): string 
   const unit = 10n ** BigInt(DECIMALS - maxFraction)
   const rounded = ((wei + unit / 2n) / unit) * unit
   const [int, frac = ''] = fromWei(rounded).split('.')
-  return `${int},${frac.padEnd(minFraction, '0')} ETH`
+  return `${int}.${frac.padEnd(minFraction, '0')} ETH`
 }

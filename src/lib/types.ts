@@ -71,6 +71,7 @@ export interface NftListParams {
   minPrice?: Eth
   maxPrice?: Eth
   sort?: NftSort
+  tab?: 'new' | 'trending'
   page?: number
   pageSize?: number
 }
@@ -99,6 +100,7 @@ export interface QuoteLine {
   name: string
   imageUrl: string
   editionLabel: string
+  tokenId: string
   quantity: number
   unitPrice: Eth
   lineTotal: Eth
@@ -128,9 +130,13 @@ export interface Wallet {
   network: NetworkName
   address: string
   type: 'MetaMask' | 'WalletConnect' | 'Coinbase Wallet'
-  referralCode?: string
+  profileName: string
+  referralCode: string
   email: string
-  ens?: string
+  /** Nome ENS completo, ex.: nova.kurio.eth */
+  ens: string
+  /** ENS ou carteira secundária (opcional no Figma). */
+  linkedRef?: string
 }
 
 export type WalletInput = Omit<Wallet, 'id'>
@@ -142,6 +148,7 @@ export interface OrderLine {
   name: string
   imageUrl: string
   editionLabel: string
+  tokenId: string
   quantity: number
   unitPrice: Eth
   lineTotal: Eth
@@ -157,6 +164,7 @@ export interface Order {
   network: NetworkName
   walletId: string
   walletAddress: string
+  walletType: string
   /** Snapshot imutável do que foi comprado. */
   lines: OrderLine[]
   subtotal: Eth

@@ -89,6 +89,43 @@ await new Promise((r) => setTimeout(r, 200))
 const ordEvt = events.find((e) => e[0] === 'order')
 assert(ordEvt && ordEvt[1].status === 'confirmed', 'order.updated confirma o pedido pelo socket')
 
+// --- Isolamento entre usuários, favoritos, carrinho e carteiras ---
+const bruno = (await call('/api/auth/login', { method: 'POST', body: JSON.stringify({ email: 'bruno@kurio.test', password: 'Kurio@123' }) })).json.token as string
+assert((await call('/api/orders/' + created.json.id, { token: bruno })).status === 403, 'outro usuário não acessa o pedido (403)')
+assert((await call('/api/wallets', { token: bruno })).json.wallets.length === 0, 'carteiras isoladas por usuário')
+const wallets = (await call('/api/wallets', { token })).json.wallets
+assert(wallets.length === 2 && wallets[0].profileName && wallets[0].ens, 'carteiras com os campos do Figma')
+
+const fav = await call('/api/favorites/nft-003', { method: 'PUT', token })
+assert(fav.json.nftIds.includes('nft-003'), 'favorito persiste para o usuário')
+assert((await call('/api/favorites', { token: bruno })).json.nftIds.length === 0, 'favoritos de outro usuário não vazam')
+
+await call('/api/cart/items', { method: 'POST', token: bruno, body: JSON.stringify({ nftId: 'nft-001', quantity: 1 }) })
+const over = await call('/api/cart/items', { method: 'POST', token: bruno, body: JSON.stringify({ nftId: 'nft-006', quantity: 99 }) })
+assert(over.status === 422 || over.status === 409, 'limite de quantidade respeitado no carrinho')
+const merged = await call('/api/cart/merge', { method: 'POST', token: bruno, body: JSON.stringify({ items: [{ nftId: 'nft-001', quantity: 1 }] }) })
+assert(merged.json.items.find((i: any) => i.nftId === 'nft-001').quantity === 2, 'mesclagem do carrinho de visitante soma quantidades')
+assert((await call('/api/cart/coupon', { method: 'PUT', token: bruno, body: JSON.stringify({ code: 'NAOEXISTE' }) })).json.code === 'coupon_invalid', 'cupom inválido')
+assert((await call('/api/cart/coupon', { method: 'PUT', token: bruno, body: JSON.stringify({ code: 'EXPIRADO' }) })).json.code === 'coupon_expired', 'cupom expirado')
+
+const refused = await call('/api/wallets/wallet-ana-2/connection', { method: 'POST', token, body: JSON.stringify({ action: 'connect' }) })
+assert(refused.status === 422 && refused.json.code === 'wallet_refused', 'carteira recusa a conexão')
+const okConn = await call('/api/wallets/wallet-ana-1/connection', { method: 'POST', token, body: JSON.stringify({ action: 'connect' }) })
+assert(okConn.json.connected === true, 'carteira principal conecta')
+
+// Bruno também escuta o socket: não pode receber order.updated da Ana.
+const leaked: any[] = []
+const sockB = io(BASE, { path: '/socket.io/', transports: ['websocket'], auth: { token: bruno }, reconnection: false })
+await new Promise<void>((r) => sockB.on('connect', () => r()))
+sockB.on('order.updated', (e) => leaked.push(e))
+const second = { ...order, items: [{ nftId: 'nft-002', quantity: 1 }], coupon: undefined }
+const q2 = (await call('/api/quote', { method: 'POST', body: JSON.stringify({ items: second.items }) })).json
+const o2 = await call('/api/orders', { method: 'POST', token, headers: { 'Idempotency-Key': 'k3' }, body: JSON.stringify({ ...second, expectedTotal: q2.total, expectedFingerprint: q2.fingerprint }) })
+await call(`/__mock/orders/${o2.json.id}/settle`, { method: 'POST' })
+await new Promise((r) => setTimeout(r, 200))
+assert(leaked.length === 0, 'order.updated não vaza para outro usuário')
+sockB.disconnect()
+
 sock.disconnect()
 server.close()
 console.log('\nTodos os testes de fumaça passaram.')

@@ -1,56 +1,73 @@
-import { createRootRoute, createRoute, createRouter, Link, Outlet } from '@tanstack/react-router'
-
-/**
- * Esqueleto das rotas. As telas entram uma a uma nos próximos passos;
- * as rotas privadas ganham o guard (beforeLoad) junto com a camada de sessão.
- */
-function Placeholder({ title }: { title: string }) {
-  return (
-    <main className="mx-auto max-w-5xl p-8">
-      <h1 className="text-2xl text-accent">{title}</h1>
-      <p className="text-muted">Tela em construção.</p>
-    </main>
-  )
-}
+import { createRootRoute, createRoute, createRouter, Link, Outlet, redirect } from '@tanstack/react-router'
+import { Footer } from '@/components/Footer'
+import { Header } from '@/components/Header'
+import { LiveRegion } from '@/components/LiveRegion'
+import { setExpiredHandler } from '@/features/auth/actions'
+import { getSession } from '@/features/auth/session'
+import { AuthPage, validateAuthSearch } from '@/routes/auth'
+import { CartPage } from '@/routes/cart'
+import { CheckoutPage } from '@/routes/checkout'
+import { HomePage, validateHomeSearch } from '@/routes/home'
+import { NftDetailPage } from '@/routes/nft'
+import { OrderPage } from '@/routes/order'
+import { ProfilePage } from '@/routes/profile'
+import { WalletsPage } from '@/routes/wallets'
 
 const rootRoute = createRootRoute({
   component: () => (
-    <>
-      <header className="flex items-center gap-6 border-b border-border px-8 py-4">
-        <Link to="/" className="text-lg tracking-wide text-ink">
-          KURIO
-        </Link>
-        <nav aria-label="Principal" className="flex gap-4 text-muted">
-          <Link to="/" activeProps={{ className: 'text-accent' }}>
-            Início
-          </Link>
-          <Link to="/carrinho" activeProps={{ className: 'text-accent' }}>
-            Carrinho
-          </Link>
-        </nav>
-      </header>
-      <Outlet />
-    </>
+    <div className="flex min-h-screen flex-col">
+      <a href="#conteudo" className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:bg-accent focus:px-3 focus:py-1 focus:text-bg">
+        Pular para o conteúdo
+      </a>
+      <Header />
+      <main id="conteudo" className="flex-1">
+        <Outlet />
+      </main>
+      <Footer />
+      <LiveRegion />
+    </div>
   ),
-  notFoundComponent: () => <Placeholder title="Página não encontrada" />,
+  notFoundComponent: () => (
+    <div className="mx-auto max-w-5xl p-8">
+      <h1 className="text-2xl text-accent">Página não encontrada</h1>
+      <p className="mt-2 text-muted">O endereço não existe ou foi movido.</p>
+      <Link to="/" className="mt-4 inline-block text-accent underline">
+        Voltar ao início
+      </Link>
+    </div>
+  ),
 })
 
-const route = <P extends string>(path: P, title: string) =>
-  createRoute({ getParentRoute: () => rootRoute, path, component: () => <Placeholder title={title} /> })
+/** Rotas privadas: sem sessão, vai ao login e volta para cá depois. */
+const requireAuth = ({ location }: { location: { href: string } }) => {
+  if (!getSession()) throw redirect({ to: '/login', search: { redirect: location.href } })
+}
+
+const indexRoute = createRoute({ getParentRoute: () => rootRoute, path: '/', validateSearch: validateHomeSearch, component: HomePage })
+const loginRoute = createRoute({ getParentRoute: () => rootRoute, path: '/login', validateSearch: validateAuthSearch, component: () => <AuthPage mode="login" /> })
+const registerRoute = createRoute({ getParentRoute: () => rootRoute, path: '/cadastro', validateSearch: validateAuthSearch, component: () => <AuthPage mode="register" /> })
+
+const screen = <P extends string>(path: P, component: () => React.JSX.Element, guarded = false) =>
+  createRoute({ getParentRoute: () => rootRoute, path, beforeLoad: guarded ? requireAuth : undefined, component })
 
 const routeTree = rootRoute.addChildren([
-  route('/', 'Início'),
-  route('/nft/$id', 'Detalhes do NFT'),
-  route('/carrinho', 'Carrinho de NFTs'),
-  route('/pagamento', 'Pagamento'),
-  route('/pedido/$id', 'Confirmação de pedido'),
-  route('/login', 'Entrar'),
-  route('/cadastro', 'Criar conta'),
-  route('/perfil', 'Perfil do colecionador'),
-  route('/carteiras', 'Carteiras'),
+  indexRoute,
+  loginRoute,
+  registerRoute,
+  screen('/nft/$id', NftDetailPage),
+  screen('/carrinho', CartPage),
+  screen('/pagamento', CheckoutPage, true),
+  screen('/pedido/$id', OrderPage, true),
+  screen('/perfil', ProfilePage, true),
+  screen('/carteiras', WalletsPage, true),
 ])
 
 export const router = createRouter({ routeTree, defaultPreload: 'intent' })
+
+// Sessão expirada em qualquer chamada: leva ao login e preserva a rota atual para retomar.
+setExpiredHandler(() => {
+  void router.navigate({ to: '/login', search: { redirect: router.state.location.href, expired: true } })
+})
 
 declare module '@tanstack/react-router' {
   interface Register {

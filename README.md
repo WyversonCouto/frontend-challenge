@@ -2,8 +2,8 @@
 
 Desafio Frontend: React + TypeScript, TanStack Router/Query, Axios, Socket.IO, Tailwind, shadcn/ui, MSW, Playwright e Lighthouse.
 
-> Estado atual: **base pronta** (contratos tipados, camada MSW REST + Socket.IO, cliente Axios/Socket.IO, tema e rotas).
-> As telas entram nos próximos passos.
+> Estado atual: telas de início, detalhe, carrinho, pagamento, confirmação, login, cadastro, perfil e carteiras (desktop e mobile),
+> sobre contratos tipados e a camada MSW (REST + Socket.IO). Testes Playwright e auditoria Lighthouse: próximos passos.
 
 ## Setup
 
@@ -14,6 +14,9 @@ npm run typecheck
 npm run lint
 npm run build && npm run preview
 npm run smoke        # valida REST + Socket.IO da camada de mocks fora do navegador
+npm run test:e2e     # Playwright (sobe build + preview sozinho)
+npm run test:e2e:update  # cria/atualiza as baselines da regressão visual
+npm run e2e:report   # abre o relatório HTML
 ```
 
 Variável de ambiente: `VITE_ENABLE_MOCKS` (padrão ligada; `false` desliga o MSW).
@@ -61,3 +64,17 @@ Chamados pelo `fetch` da própria página (o MSW intercepta no navegador):
 ## Deploy
 
 `vercel.json` já reescreve rotas para `index.html` (refresh e acesso direto) e preserva `mockServiceWorker.js`.
+
+## Testes E2E (Playwright)
+
+```bash
+npx playwright install chromium     # uma vez
+npm run test:e2e:update             # 1ª vez: gera as baselines visuais (e2e/visual.spec.ts-snapshots/)
+npm run test:e2e
+npm run e2e:report                  # relatório HTML; traces das falhas ficam em test-results/
+```
+
+- Roda contra o build otimizado com o MSW ativo. Cada teste abre um contexto novo: o "banco" simulado vive no `localStorage` do contexto, então todo teste começa de um estado conhecido.
+- Projetos: `desktop` (1440×900, todos os testes), `mobile` (390×844: compra, autenticação, carrinho e responsividade) e `tablet` (768×1024: responsividade).
+- REST passa pelos handlers MSW; tempo real passa pelo `socket.io-client` real (eventos disparados por `/__mock/...`, nunca por setters na UI).
+- Latência e falhas são controladas pelos cenários (`?scenario=...`), então os testes sensíveis a tempo não dependem de relógio real.

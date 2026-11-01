@@ -1,3 +1,4 @@
+@import '@fontsource-variable/jetbrains-mono';
 @import 'tailwindcss';
 
 /*
@@ -6,16 +7,16 @@
  */
 @theme {
   --color-bg: #1a0f0a;
-  --color-surface: #241510;
-  --color-surface-2: #2e1b13;
+  --color-surface: #23150f;
+  --color-surface-2: #3a2314;
   --color-border: #4a2e1f;
   --color-accent: #d98c4a;
   --color-accent-strong: #e9a15f;
-  --color-ink: #f3e7d8;
-  --color-muted: #b09a85;
+  --color-ink: #f6eee6;
+  --color-muted: #cd9664;
   --color-danger: #ff8a7a;
   --color-ok: #8fd19e;
-  --font-mono: ui-monospace, 'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, monospace;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
 }
 
 :root {

@@ -164,7 +164,8 @@ function listNfts(params: URLSearchParams): NftPage {
   const network = params.get('network')
   const min = params.get('minPrice')
   const max = params.get('maxPrice')
-  const sort = (params.get('sort') ?? 'recent') as NftSort
+  const tab = params.get('tab')
+  const sort = (params.get('sort') ?? (tab === 'trending' ? 'trending' : 'recent')) as NftSort | 'trending'
   const pageSize = Math.min(Math.max(Number(params.get('pageSize')) || 9, 1), 48)
   const requested = Math.max(Number(params.get('page')) || 1, 1)
 
@@ -175,8 +176,13 @@ function listNfts(params: URLSearchParams): NftPage {
   if (network) items = items.filter((n) => n.network === network)
   if (min) items = items.filter((n) => cmpEth(n.price, min) >= 0)
   if (max) items = items.filter((n) => cmpEth(n.price, max) <= 0)
+  if (tab === 'new') {
+    const cutoff = [...db().nfts].sort((a, b) => b.createdAt.localeCompare(a.createdAt))[11]?.createdAt ?? ''
+    items = items.filter((n) => n.createdAt >= cutoff)
+  }
 
-  const sorters: Record<NftSort, (a: Nft, b: Nft) => number> = {
+  const sorters: Record<NftSort | 'trending', (a: Nft, b: Nft) => number> = {
+    trending: (a, b) => b.reviews - a.reviews,
     recent: (a, b) => b.createdAt.localeCompare(a.createdAt),
     price_asc: (a, b) => cmpEth(a.price, b.price),
     price_desc: (a, b) => cmpEth(b.price, a.price),
@@ -237,9 +243,11 @@ const walletSchema = z.object({
   network: z.enum(['Ethereum', 'Polygon', 'Solana']),
   address: z.string().regex(/^0x[a-fA-F0-9]{40}$/, 'Endereço inválido (0x + 40 caracteres).'),
   type: z.enum(['MetaMask', 'WalletConnect', 'Coinbase Wallet']),
-  referralCode: z.string().trim().optional(),
+  profileName: z.string().trim().min(2, 'Informe o nome do perfil.'),
+  referralCode: z.string().trim().min(2, 'Informe o código de indicação.'),
   email: z.email('Informe um e-mail válido.'),
-  ens: z.string().trim().optional(),
+  ens: z.string().trim().regex(/^[a-z0-9-]{3,}(\.[a-z0-9-]+)*\.eth$/i, 'Use o formato nome.eth.'),
+  linkedRef: z.string().trim().optional(),
 })
 
 const itemsSchema = z.array(z.object({ nftId: z.string(), quantity: z.number().int().min(1).max(99) })).max(50)
