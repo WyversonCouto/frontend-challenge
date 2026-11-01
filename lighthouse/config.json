@@ -1,0 +1,10 @@
+{
+  "base": "http://localhost:4174",
+  "runs": 3,
+  "pages": [
+    { "name": "inicio", "path": "/" },
+    { "name": "detalhe", "path": "/nft/nft-001" }
+  ],
+  "profiles": ["mobile", "desktop"],
+  "targets": { "performance": 90, "accessibility": 95, "best-practices": 95, "seo": 90 }
+}

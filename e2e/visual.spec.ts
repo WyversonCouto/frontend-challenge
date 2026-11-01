@@ -25,7 +25,11 @@ test('visual: detalhe do NFT', async ({ page }) => {
 
 test('visual: carrinho', async ({ page }) => {
   await buy(page, 'nft-001')
-  await expect(page.getByText('1.19 ETH').first()).toBeVisible()
+  // a captura só vale com o resumo carregado (e não com os esqueletos)
+  await expect(page.getByText('1.206 ETH', { exact: true })).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Itens do carrinho' }).getByRole('link', { name: 'Emerald Ape #042' })).toBeVisible()
+  await expect(page.getByLabel('Carregando resumo')).toBeHidden()
+  await expect(page.getByRole('region', { name: 'Colecionadores também viram' }).getByRole('link').first()).toBeVisible()
   await settle(page)
   await expect(page).toHaveScreenshot('carrinho.png', shot)
 })

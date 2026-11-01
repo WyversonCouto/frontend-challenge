@@ -1,0 +1,264 @@
+{
+  "env": {
+    "lighthouse": "13.6.0",
+    "chrome": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "node": "v24.20.0",
+    "os": "Windows_NT 10.0.19045 (x64)",
+    "cpu": "Intel(R) Xeon(R) CPU E5-2689 0 @ 2.60GHz x16",
+    "memoryGB": 17,
+    "date": "2026-11-01T16:07:15.750Z",
+    "conditions": "Build otimizado (vite preview), cenário padrão dos mocks (MSW), Chrome novo e sem cache por medição, throttling padrão do Lighthouse (mobile: 4G simulada + CPU 4x; desktop: preset desktop)."
+  },
+  "targets": {
+    "performance": 90,
+    "accessibility": 95,
+    "best-practices": 95,
+    "seo": 90
+  },
+  "results": [
+    {
+      "page": "inicio",
+      "path": "/",
+      "profile": "mobile",
+      "runs": [
+        {
+          "n": 1,
+          "file": "inicio-mobile-run1",
+          "scores": {
+            "performance": 88,
+            "accessibility": 97,
+            "best-practices": 96,
+            "seo": 92,
+            "agentic-browsing": 50
+          },
+          "lcp": 774.6596,
+          "cls": 0,
+          "tbt": 484.6702,
+          "fcp": 774.6596
+        },
+        {
+          "n": 2,
+          "file": "inicio-mobile-run2",
+          "scores": {
+            "performance": 88,
+            "accessibility": 97,
+            "best-practices": 96,
+            "seo": 92,
+            "agentic-browsing": 50
+          },
+          "lcp": 771.1732999999999,
+          "cls": 0,
+          "tbt": 472.41335000000004,
+          "fcp": 771.1732999999999
+        },
+        {
+          "n": 3,
+          "file": "inicio-mobile-run3",
+          "scores": {
+            "performance": 85,
+            "accessibility": 97,
+            "best-practices": 96,
+            "seo": 92,
+            "agentic-browsing": 50
+          },
+          "lcp": 773.1983,
+          "cls": 0,
+          "tbt": 584.90085,
+          "fcp": 773.1983
+        }
+      ],
+      "median": {
+        "performance": 88,
+        "accessibility": 97,
+        "best-practices": 96,
+        "seo": 92,
+        "lcp": 773,
+        "cls": 0,
+        "tbt": 485
+      }
+    },
+    {
+      "page": "detalhe",
+      "path": "/nft/nft-001",
+      "profile": "mobile",
+      "runs": [
+        {
+          "n": 1,
+          "file": "detalhe-mobile-run1",
+          "scores": {
+            "performance": 82,
+            "accessibility": 97,
+            "best-practices": 96,
+            "seo": 92,
+            "agentic-browsing": 50
+          },
+          "lcp": 3105.4041,
+          "cls": 0.0004476499761262424,
+          "tbt": 468.5479499999999,
+          "fcp": 769.9041
+        },
+        {
+          "n": 2,
+          "file": "detalhe-mobile-run2",
+          "scores": {
+            "performance": 76,
+            "accessibility": 97,
+            "best-practices": 96,
+            "seo": 92,
+            "agentic-browsing": 50
+          },
+          "lcp": 3240.0783,
+          "cls": 0.0004476499761262424,
+          "tbt": 656.2108499999997,
+          "fcp": 767.5782999999999
+        },
+        {
+          "n": 3,
+          "file": "detalhe-mobile-run3",
+          "scores": {
+            "performance": 82,
+            "accessibility": 97,
+            "best-practices": 96,
+            "seo": 92,
+            "agentic-browsing": 50
+          },
+          "lcp": 3125.7843999999996,
+          "cls": 0.0004476499761262424,
+          "tbt": 444.49999999999955,
+          "fcp": 770.2844
+        }
+      ],
+      "median": {
+        "performance": 82,
+        "accessibility": 97,
+        "best-practices": 96,
+        "seo": 92,
+        "lcp": 3126,
+        "cls": 0,
+        "tbt": 469
+      }
+    },
+    {
+      "page": "inicio",
+      "path": "/",
+      "profile": "desktop",
+      "runs": [
+        {
+          "n": 1,
+          "file": "inicio-desktop-run1",
+          "scores": {
+            "performance": 100,
+            "accessibility": 97,
+            "best-practices": 96,
+            "seo": 92,
+            "agentic-browsing": 50
+          },
+          "lcp": 676.2408,
+          "cls": 0.010011244647573272,
+          "tbt": 25.879599999999982,
+          "fcp": 220.24079999999998
+        },
+        {
+          "n": 2,
+          "file": "inicio-desktop-run2",
+          "scores": {
+            "performance": 100,
+            "accessibility": 97,
+            "best-practices": 96,
+            "seo": 92,
+            "agentic-browsing": 50
+          },
+          "lcp": 646.23385,
+          "cls": 0.010011244647573272,
+          "tbt": 0,
+          "fcp": 220.15589999999997
+        },
+        {
+          "n": 3,
+          "file": "inicio-desktop-run3",
+          "scores": {
+            "performance": 100,
+            "accessibility": 97,
+            "best-practices": 96,
+            "seo": 92,
+            "agentic-browsing": 50
+          },
+          "lcp": 670.6288999999999,
+          "cls": 0.010011244647573272,
+          "tbt": 16,
+          "fcp": 219.6289
+        }
+      ],
+      "median": {
+        "performance": 100,
+        "accessibility": 97,
+        "best-practices": 96,
+        "seo": 92,
+        "lcp": 671,
+        "cls": 0.01,
+        "tbt": 16
+      }
+    },
+    {
+      "page": "detalhe",
+      "path": "/nft/nft-001",
+      "profile": "desktop",
+      "runs": [
+        {
+          "n": 1,
+          "file": "detalhe-desktop-run1",
+          "scores": {
+            "performance": 100,
+            "accessibility": 97,
+            "best-practices": 96,
+            "seo": 92,
+            "agentic-browsing": 50
+          },
+          "lcp": 686.4186,
+          "cls": 0.0001270949339264241,
+          "tbt": 31,
+          "fcp": 220.41859999999997
+        },
+        {
+          "n": 2,
+          "file": "detalhe-desktop-run2",
+          "scores": {
+            "performance": 100,
+            "accessibility": 97,
+            "best-practices": 96,
+            "seo": 92,
+            "agentic-browsing": 50
+          },
+          "lcp": 685.8422,
+          "cls": 0.0001270949339264241,
+          "tbt": 12,
+          "fcp": 224.3422
+        },
+        {
+          "n": 3,
+          "file": "detalhe-desktop-run3",
+          "scores": {
+            "performance": 100,
+            "accessibility": 97,
+            "best-practices": 96,
+            "seo": 92,
+            "agentic-browsing": 50
+          },
+          "lcp": 666.8212,
+          "cls": 0.0001270949339264241,
+          "tbt": 10,
+          "fcp": 220.32119999999998
+        }
+      ],
+      "median": {
+        "performance": 100,
+        "accessibility": 97,
+        "best-practices": 96,
+        "seo": 92,
+        "lcp": 686,
+        "cls": 0,
+        "tbt": 12
+      }
+    }
+  ]
+}

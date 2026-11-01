@@ -17,6 +17,7 @@ npm run smoke        # valida REST + Socket.IO da camada de mocks fora do navega
 npm run test:e2e     # Playwright (sobe build + preview sozinho)
 npm run test:e2e:update  # cria/atualiza as baselines da regressão visual
 npm run e2e:report   # abre o relatório HTML
+npm run lighthouse   # auditoria Lighthouse (início e detalhe, mobile e desktop, mediana de 3)
 ```
 
 Variável de ambiente: `VITE_ENABLE_MOCKS` (padrão ligada; `false` desliga o MSW).
@@ -80,3 +81,11 @@ npm run e2e:report                  # relatório HTML; traces das falhas ficam e
 - Latência e falhas são controladas pelos cenários (`?scenario=...`), então os testes sensíveis a tempo não dependem de relógio real.
 
 > **Regressão visual:** as capturas de referência dependem do sistema operacional (o Playwright acrescenta `-win32`, `-linux` ou `-darwin` ao nome). Gere as do seu ambiente com `npm run test:e2e:update` antes de rodar `npm run test:e2e`. Se a máquina for lenta, use `-- --workers=2`.
+
+## Lighthouse
+
+```bash
+npm run lighthouse
+```
+
+Usa o Chrome instalado na máquina (ou `CHROME_PATH`). Ao terminar, veja `lighthouse/SUMMARY.md` (notas, LCP, CLS, TBT, versões das ferramentas e condições da execução) e abra os relatórios em `lighthouse/reports/*.html`. Resultados abaixo da meta e as causas estão em `ARCHITECTURE.md` (seção "Performance e Lighthouse").

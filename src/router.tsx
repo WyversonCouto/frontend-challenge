@@ -1,17 +1,12 @@
-import { createRootRoute, createRoute, createRouter, Link, Outlet, redirect } from '@tanstack/react-router'
+import { createRootRoute, createRoute, createRouter, lazyRouteComponent, Link, Outlet, redirect, type RouteComponent } from '@tanstack/react-router'
 import { Footer } from '@/components/Footer'
 import { Header } from '@/components/Header'
 import { LiveRegion } from '@/components/LiveRegion'
 import { setExpiredHandler } from '@/features/auth/actions'
 import { getSession } from '@/features/auth/session'
-import { AuthPage, validateAuthSearch } from '@/routes/auth'
-import { CartPage } from '@/routes/cart'
-import { CheckoutPage } from '@/routes/checkout'
+import { validateAuthSearch } from '@/routes/authSearch'
 import { HomePage, validateHomeSearch } from '@/routes/home'
 import { NftDetailPage } from '@/routes/nft'
-import { OrderPage } from '@/routes/order'
-import { ProfilePage } from '@/routes/profile'
-import { WalletsPage } from '@/routes/wallets'
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -44,10 +39,10 @@ const requireAuth = ({ location }: { location: { href: string } }) => {
 }
 
 const indexRoute = createRoute({ getParentRoute: () => rootRoute, path: '/', validateSearch: validateHomeSearch, component: HomePage })
-const loginRoute = createRoute({ getParentRoute: () => rootRoute, path: '/login', validateSearch: validateAuthSearch, component: () => <AuthPage mode="login" /> })
-const registerRoute = createRoute({ getParentRoute: () => rootRoute, path: '/cadastro', validateSearch: validateAuthSearch, component: () => <AuthPage mode="register" /> })
+const loginRoute = createRoute({ getParentRoute: () => rootRoute, path: '/login', validateSearch: validateAuthSearch, component: lazyRouteComponent(() => import('@/routes/auth'), 'LoginPage') })
+const registerRoute = createRoute({ getParentRoute: () => rootRoute, path: '/cadastro', validateSearch: validateAuthSearch, component: lazyRouteComponent(() => import('@/routes/auth'), 'RegisterPage') })
 
-const screen = <P extends string>(path: P, component: () => React.JSX.Element, guarded = false) =>
+const screen = <P extends string>(path: P, component: RouteComponent, guarded = false) =>
   createRoute({ getParentRoute: () => rootRoute, path, beforeLoad: guarded ? requireAuth : undefined, component })
 
 const routeTree = rootRoute.addChildren([
@@ -55,14 +50,19 @@ const routeTree = rootRoute.addChildren([
   loginRoute,
   registerRoute,
   screen('/nft/$id', NftDetailPage),
-  screen('/carrinho', CartPage),
-  screen('/pagamento', CheckoutPage, true),
-  screen('/pedido/$id', OrderPage, true),
-  screen('/perfil', ProfilePage, true),
-  screen('/carteiras', WalletsPage, true),
+  screen('/carrinho', lazyRouteComponent(() => import('@/routes/cart'), 'CartPage')),
+  screen('/pagamento', lazyRouteComponent(() => import('@/routes/checkout'), 'CheckoutPage'), true),
+  screen('/pedido/$id', lazyRouteComponent(() => import('@/routes/order'), 'OrderPage'), true),
+  screen('/perfil', lazyRouteComponent(() => import('@/routes/profile'), 'ProfilePage'), true),
+  screen('/carteiras', lazyRouteComponent(() => import('@/routes/wallets'), 'WalletsPage'), true),
 ])
 
-export const router = createRouter({ routeTree, defaultPreload: 'intent' })
+/** Reserva o espaço da tela enquanto o código dela carrega (sem salto de layout). */
+function RoutePending() {
+  return <div aria-busy="true" aria-label="Carregando" className="min-h-[60vh]" />
+}
+
+export const router = createRouter({ routeTree, defaultPreload: 'intent', defaultPendingComponent: RoutePending, defaultPendingMs: 150 })
 
 // Sessão expirada em qualquer chamada: leva ao login e preserva a rota atual para retomar.
 setExpiredHandler(() => {

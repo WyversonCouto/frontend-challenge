@@ -4,3 +4,6 @@ playwright-report
 test-results
 .vercel
 *.local
+
+# gerado pelo Lighthouse (reproduzível com npm run lighthouse); só os relatórios medianos são versionados
+lighthouse/raw/

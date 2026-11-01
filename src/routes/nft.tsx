@@ -10,16 +10,22 @@ import { ApiError } from '@/lib/api'
 import { announce } from '@/lib/announce'
 import { formatEth, mulEthInt } from '@/lib/eth'
 
+/** Mesmo contêiner (e altura mínima) do conteúdo final: o rodapé não "pula" quando os dados chegam. */
+const SHELL = 'mx-auto min-h-[1150px] max-w-[1000px] px-0 pb-28 pt-0 md:px-8 md:pb-10 md:pt-6'
+
 function DetailSkeleton() {
   return (
-    <div aria-busy="true" aria-label="Carregando NFT" className="grid gap-6 md:grid-cols-[74px_minmax(0,330px)_1fr]">
-      <div className="hidden gap-2 md:grid">{Array.from({ length: 4 }, (_, i) => <Skeleton key={i} className="h-[66px] w-[66px]" />)}</div>
-      <Skeleton className="aspect-square w-full" />
-      <div className="space-y-3">
-        <Skeleton className="h-6 w-2/3" />
-        <Skeleton className="h-5 w-24" />
-        <Skeleton className="h-16 w-full" />
-        <Skeleton className="h-8 w-1/2" />
+    <div aria-busy="true" aria-label="Carregando NFT">
+      <div className="mb-4 hidden h-[17px] w-40 md:block"><Skeleton className="h-full w-full" /></div>
+      <div className="grid gap-6 md:grid-cols-[74px_minmax(0,330px)_1fr]">
+        <div className="hidden gap-2 md:grid md:content-start">{Array.from({ length: 4 }, (_, i) => <Skeleton key={i} className="h-[66px] w-[66px]" />)}</div>
+        <div className="bg-surface md:rounded-sm md:p-3"><Skeleton className="aspect-square w-full" /></div>
+        <div className="-mt-6 space-y-3 rounded-t-3xl bg-surface px-5 pb-6 pt-5 md:mt-0 md:bg-transparent md:p-0">
+          <Skeleton className="h-6 w-2/3" />
+          <Skeleton className="h-5 w-24" />
+          <Skeleton className="h-16 w-full" />
+          <Skeleton className="h-8 w-1/2" />
+        </div>
       </div>
     </div>
   )
@@ -40,7 +46,7 @@ export function NftDetailPage() {
 
   if (isPending) {
     return (
-      <div className="mx-auto max-w-[1000px] px-4 py-6 sm:px-8">
+      <div className={SHELL}>
         <DetailSkeleton />
       </div>
     )
@@ -93,7 +99,7 @@ export function NftDetailPage() {
   const edition = `1/${nft.editionsTotal}`
 
   return (
-    <div className="mx-auto max-w-[1000px] px-0 pb-28 pt-0 md:px-8 md:pb-10 md:pt-6">
+    <div className={SHELL}>
       <div className="hidden md:block">
         <Breadcrumb trail={[{ label: 'Início', to: '/' }, { label: 'Mercado' }]} />
       </div>

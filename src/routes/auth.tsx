@@ -6,27 +6,11 @@ import { mergeGuestCart } from '@/features/cart/useCart'
 import { ApiError } from '@/lib/api'
 import { announce } from '@/lib/announce'
 import { Button, Icon, trapTab } from '@/components/ui'
+import { safeRedirect, type AuthSearch } from './authSearch'
 
 type Mode = 'login' | 'register'
 type Values = Record<'username' | 'email' | 'password' | 'confirmPassword', string>
 type Errors = Partial<Record<keyof Values | 'form', string>>
-
-export interface AuthSearch {
-  redirect?: string
-  expired?: boolean
-}
-
-/** Só aceita retorno para caminhos internos (evita open redirect). */
-export function safeRedirect(path?: string) {
-  return path && path.startsWith('/') && !path.startsWith('//') ? path : '/'
-}
-
-export function validateAuthSearch(s: Record<string, unknown>): AuthSearch {
-  return {
-    redirect: typeof s.redirect === 'string' ? safeRedirect(s.redirect) : undefined,
-    expired: s.expired === true || s.expired === 'true' ? true : undefined,
-  }
-}
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -255,3 +239,6 @@ export function AuthPage({ mode }: { mode: Mode }) {
     </>
   )
 }
+
+export const LoginPage = () => <AuthPage mode="login" />
+export const RegisterPage = () => <AuthPage mode="register" />

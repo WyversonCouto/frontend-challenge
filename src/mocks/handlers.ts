@@ -4,7 +4,6 @@ import { cmpEth } from '@/lib/eth'
 import type {
   ApiErrorBody,
   ApiErrorCode,
-  Nft,
   NftPage,
   NftSort,
   SocketEvent,
@@ -19,6 +18,8 @@ import {
   createOrder,
   db,
   findNft,
+  toNft,
+  type DbNft,
   hashPassword,
   initDb,
   nextId,
@@ -169,7 +170,7 @@ function listNfts(params: URLSearchParams): NftPage {
   const pageSize = Math.min(Math.max(Number(params.get('pageSize')) || 9, 1), 48)
   const requested = Math.max(Number(params.get('page')) || 1, 1)
 
-  let items: Nft[] = getScenario() === 'empty' ? [] : [...db().nfts]
+  let items: DbNft[] = getScenario() === 'empty' ? [] : [...db().nfts]
   const base = items
   if (q) items = items.filter((n) => `${n.name} ${n.collection}`.toLowerCase().includes(q))
   if (category) items = items.filter((n) => n.category === category)
@@ -181,7 +182,7 @@ function listNfts(params: URLSearchParams): NftPage {
     items = items.filter((n) => n.createdAt >= cutoff)
   }
 
-  const sorters: Record<NftSort | 'trending', (a: Nft, b: Nft) => number> = {
+  const sorters: Record<NftSort | 'trending', (a: DbNft, b: DbNft) => number> = {
     trending: (a, b) => b.reviews - a.reviews,
     recent: (a, b) => b.createdAt.localeCompare(a.createdAt),
     price_asc: (a, b) => cmpEth(a.price, b.price),
@@ -197,7 +198,7 @@ function listNfts(params: URLSearchParams): NftPage {
     base.reduce<Record<string, number>>((acc, n) => ({ ...acc, [n[key]]: (acc[n[key]] ?? 0) + 1 }), {})
 
   return {
-    items: items.slice((page - 1) * pageSize, page * pageSize),
+    items: items.slice((page - 1) * pageSize, page * pageSize).map((n) => toNft(n, false)),
     total,
     page,
     pageSize,
@@ -351,7 +352,7 @@ export const restHandlers = [
     api('/nfts/:id'),
     scenario(({ params }) => {
       const nft = findNft(String(params.id))
-      return nft ? HttpResponse.json(nft) : fail('not_found', 'Este NFT não existe ou foi removido.')
+      return nft ? HttpResponse.json(toNft(nft)) : fail('not_found', 'Este NFT não existe ou foi removido.')
     }),
   ),
 
@@ -743,7 +744,7 @@ export const controlHandlers = [
   http.post(ctrl('/nfts/:id'), async ({ request, params }) => {
     const patch = (await request.json()) as { price?: string; editionsAvailable?: number }
     const nft = touchNft(String(params.id), patch)
-    return nft ? HttpResponse.json(nft) : fail('not_found', 'NFT não encontrado.')
+    return nft ? HttpResponse.json(toNft(nft)) : fail('not_found', 'NFT não encontrado.')
   }),
   /** Entrega um evento exatamente como recebido: duplicata, versão antiga, outro usuário. */
   http.post(ctrl('/socket/emit'), async ({ request }) => {

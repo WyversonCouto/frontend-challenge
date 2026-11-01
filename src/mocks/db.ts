@@ -12,7 +12,7 @@ import type {
 import { bus } from './bus'
 import { getScenario } from './scenarios'
 
-const STORAGE_KEY = 'kurio:mock:db:v2'
+const STORAGE_KEY = 'kurio:mock:db:v3'
 export const NETWORK_FEE = '0.016'
 export const SESSION_TTL_MS = 30 * 60 * 1000
 export const ORDER_SETTLE_MS = 2500
@@ -32,8 +32,27 @@ export interface DbOrder extends Order {
   willDecline: boolean
 }
 
+/** No banco só fica a semente da arte; as imagens SVG são geradas (e memorizadas) sob demanda. */
+export interface DbNft extends Omit<Nft, 'imageUrl' | 'gallery'> {
+  artSeed: number
+}
+
+const artCache = new Map<string, string>()
+export function artFor(seed: number, variant = 0): string {
+  const key = `${seed}:${variant}`
+  let svg = artCache.get(key)
+  if (!svg) artCache.set(key, (svg = art(seed, variant)))
+  return svg
+}
+
+/** `full` inclui a galeria completa (detalhe); nas listas vai só a imagem principal. */
+export function toNft(n: DbNft, full = true): Nft {
+  const { artSeed, ...rest } = n
+  return { ...rest, imageUrl: artFor(artSeed), gallery: full ? [0, 1, 2, 3].map((v) => artFor(artSeed, v)) : [artFor(artSeed)] }
+}
+
 interface Db {
-  nfts: Nft[]
+  nfts: DbNft[]
   users: DbUser[]
   sessions: Record<string, { userId: string; expiresAt: number }>
   favorites: Record<string, string[]>
@@ -128,9 +147,9 @@ const FIGMA_NFTS: Array<[string, string]> = [
 const ADJ = ['Amber', 'Jade', 'Onyx', 'Lunar', 'Solar', 'Coral', 'Cobalt', 'Velvet', 'Rustic', 'Misty']
 const NOUN = ['Ape', 'Drifter', 'Echo', 'Relic', 'Voyager', 'Sentinel', 'Totem', 'Oracle', 'Warden', 'Muse']
 
-function seedNfts(): Nft[] {
+function seedNfts(): DbNft[] {
   const rnd = mulberry32(42)
-  const out: Nft[] = []
+  const out: DbNft[] = []
   const total = 58
   for (let i = 0; i < total; i++) {
     const fixed = FIGMA_NFTS[i]
@@ -149,8 +168,7 @@ function seedNfts(): Nft[] {
       price,
       editionsTotal,
       editionsAvailable: Math.min(available, editionsTotal),
-      imageUrl: art(i + 1),
-      gallery: [art(i + 1), art(i + 1, 1), art(i + 1, 2), art(i + 1, 3)],
+      artSeed: i + 1,
       rating: 4 + Math.round(rnd() * 10) / 10,
       reviews: 20 + Math.floor(rnd() * 120),
       description:
@@ -326,7 +344,7 @@ export function buildQuote(items: CartItem[], coupon?: string): Quote {
       {
         nftId: nft.id,
         name: nft.name,
-        imageUrl: nft.imageUrl,
+        imageUrl: artFor(nft.artSeed),
         editionLabel: `${Math.min(item.quantity, nft.editionsTotal)}/${nft.editionsTotal}`,
         tokenId: nft.tokenId,
         quantity: item.quantity,

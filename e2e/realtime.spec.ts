@@ -3,7 +3,9 @@ import { buy, login, mock, ordersCount, receipt, reviewOrder, toCheckout } from 
 
 test('9. preço alterado via Socket.IO com o item no carrinho: avisa e atualiza o resumo', async ({ page }) => {
   await buy(page, 'nft-001')
-  await expect(page.getByText('1.19 ETH').first()).toBeVisible()
+  // espera a cotação do carrinho carregar (1.19 + taxa 0.016). Só "1.19 ETH" não serve: o mesmo
+  // texto aparece na faixa "Colecionadores também viram", que pode carregar antes do resumo.
+  await expect(page.getByText('1.206 ETH', { exact: true })).toBeVisible()
   await mock(page, '/__mock/nfts/nft-001', { price: '3.50' })
   await expect(page.getByText(/o preço mudou de 1\.19 ETH para 3\.50 ETH/)).toBeVisible()
   // 3.50 + taxa 0.016 = 3.516

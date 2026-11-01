@@ -48,3 +48,16 @@ Token opaco emitido pela API simulada, guardado em `localStorage` junto do usuá
 - **Pagamento:** os dados da carteira (endereço, tipo, ENS, código de indicação) vêm do cadastro e aparecem somente leitura; editáveis são nome de exibição, e-mail, rede e observação. A conexão da carteira é simulada (a Coinbase Wallet das fixtures sempre recusa).
 - **Ações fora do escopo** (Criadores, Aprender, redes sociais, login social, newsletter, "Ver no Etherscan", compartilhar) só avisam que não fazem parte da demonstração; nunca aparentam sucesso.
 - **Tokens de cor/tipografia** em `src/index.css` foram estimados dos prints e precisam ser conferidos no Figma.
+
+## Performance e Lighthouse
+
+Auditoria reproduzível: `npm run lighthouse` (build otimizado + `vite preview`, cenário padrão dos mocks, Chrome novo e sem cache por medição, 3 medições por página e perfil, mediana). Gera `lighthouse/SUMMARY.md` (notas, LCP, CLS, TBT, versões e ambiente), `lighthouse/summary.json` e os relatórios HTML/JSON da execução mediana em `lighthouse/reports/`. A configuração fica em `lighthouse/config.json`. Nada é simplificado para a nota: a auditoria carrega as mesmas imagens, fontes e mocks da entrega.
+
+**Decisões que afetam a performance**
+- **CLS:** o esqueleto do detalhe usa o mesmo contêiner, as mesmas dimensões e a mesma altura mínima do conteúdo final, então o rodapé não se desloca quando os dados chegam (antes: CLS 0,46 no desktop; agora 0).
+- **Cadeia de carregamento:** os mocks entram por `import` estático em `main.tsx` (um `import()` dinâmico criava mais um nível de espera antes do primeiro dado). O `socket.io-client`, que precisa carregar **depois** do MSW, continua dinâmico (`lib/socket.ts`).
+- **Divisão de código:** carrinho, pagamento, pedido, perfil, carteiras e login/cadastro são carregados sob demanda (`lazyRouteComponent`); início e detalhe, que são as telas auditadas, ficam no pacote inicial.
+- **Dados simulados enxutos:** o banco guarda só a semente da arte; as imagens SVG são geradas e memorizadas sob demanda, e as listas enviam uma imagem por item (a galeria completa só vem no detalhe).
+- **Imagens e fontes:** imagens com `width`/`height`; fonte local (`@fontsource-variable/jetbrains-mono`) com `font-display: swap`.
+
+**Causas conhecidas de notas menores no mobile** (justificativa pedida no enunciado): a simulação mobile do Lighthouse usa rede 4G lenta e CPU 4x mais lenta, então o volume de JavaScript domina o LCP e o TBT. O pacote inicial carrega a camada de mocks, que o enunciado exige no build publicado. Os maiores componentes, por tamanho de código-fonte: `react-dom` (~620 KB), `zod` (~360 KB, usado só para validar as requisições nos handlers do MSW), `msw` (~230 KB) e `tough-cookie` + `tldts` (~260 KB, dependências internas do MSW para cookies, não usadas aqui). Próximos cortes, em ordem de retorno: trocar o `zod` dos handlers por validadores leves; aliasar o suporte a cookies do MSW; registrar parte dos handlers (carteiras, perfil, pedidos) depois da primeira renderização com `worker.use`.
